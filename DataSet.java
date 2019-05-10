@@ -9,248 +9,274 @@ import java.util.Scanner;
 import javax.swing.*;
 
 /**
-  Dataset class Author: S. Bhatnagar
-  -mostly static methods which operate on the data set
- */
+   Dataset class Author: S. Bhatnagar
+   -mostly static methods which operate on the data set
+*/
 public class DataSet {
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  // method that creates a list of dataPoints
-  public static List<DataPoint> readDataSet(String file) throws FileNotFoundException {
-
-    List<DataPoint> dataset = new ArrayList<DataPoint>();
-    Scanner scanner = new Scanner(new File(file));
-
-    String line;
-    String[] columns;
-    String label;
-
-    while (scanner.hasNextLine()) {
-      line = scanner.nextLine();
-      columns = line.split(",");
-
-      // feature vector will append 1 as x_0, and then take in all
-      // but the last column (which is assigned as label)
-      double[] X = new double[columns.length];
-
-      X[0] = 1;
-      for (int i = 1; i < columns.length; i++) {
-        // check if feature is numeric
-        if (isNumeric(columns[i - 1])) {
-          X[i] = Double.parseDouble(columns[i - 1]);
-        } else {
-          // code to convert nominal X to numeric
+    public static void main(String[] args) {
+        if (args.length < 1) {
+            System.out.println("Enter a filename for a dataset");
+            System.exit(1);
         }
-      }
+	
+	try {
+	    List<DataPoint> dataset = readDataSet(args[0]);
+	    DataPoint myPoint = dataset.get(0);
+	    double[] features = myPoint.getX();
+	    String label = myPoint.getLabel();
+	    System.out.print("Features: ");
+	    for(int i = 0; i < features.length; i++) {
+		System.out.print(features[i]);
+		System.out.print(' ');
+	    }
+	    System.out.println();
+	    System.out.println("Label: " + label);
 
-      label = columns[columns.length - 1];
-
-      // special fix of label for handwritten digits data set: label "10" switched to "0"
-      if (label.equals("10")) {
-        label = "0";
-      }
-
-      DataPoint dataPoint = new DataPoint(label, X);
-
-      dataPoint.setTestOrTrain("held_out");
-      dataset.add(dataPoint);
+	    List<DataPoint> testSet = getTestSet(dataset, 0.5);
+	    List<DataPoint> trainingSet = getTrainingSet(dataset, 0.5);
+	} catch (FileNotFoundException error) {
+	    System.out.println("File not found");
+	    System.exit(1);
+	}
     }
-    scanner.close();
+    //////////////////////////////////////////////////////////////////////////////////////////////////
+    // method that creates a list of dataPoints
+    public static List<DataPoint> readDataSet(String file) throws FileNotFoundException {
 
-    return dataset;
-  }
-  ///////////////////////////////////////////////////////////////////////////////////
+        List<DataPoint> dataset = new ArrayList<DataPoint>();
+        Scanner scanner = new Scanner(new File(file));
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
-  // method that creates a list of dataPoints with higher order polynomial X upto to user defined
-  // degree
-  public static List<DataPoint> readDataSetHigherOrderFeatures(String file, int degree)
-      throws FileNotFoundException {
+        String line;
+        String[] columns;
+        String label;
 
-    List<DataPoint> dataset = new ArrayList<DataPoint>();
-    Scanner scanner = new Scanner(new File(file));
+        while (scanner.hasNextLine()) {
+            line = scanner.nextLine();
+            columns = line.split(",");
 
-    String line;
-    String[] columns;
-    String label;
+            // feature vector will append 1 as x_0, and then take in all
+            // but the last column (which is assigned as label)
+            double[] X = new double[columns.length];
 
-    // all dataPoints in dataset given dummy labelAsDouble, which will be changed
-    // from with call to Logistic.train, based on target label
-    double labelAsDouble = -1.;
+            X[0] = 1;
+            for (int i = 1; i < columns.length; i++) {
+                // check if feature is numeric
+                if (isNumeric(columns[i - 1])) {
+                    X[i] = Double.parseDouble(columns[i - 1]);
+                } else {
+                    // code to convert nominal X to numeric
+                }
+            }
 
-    while (scanner.hasNextLine()) {
-      line = scanner.nextLine();
-      columns = line.split(",");
+            label = columns[columns.length - 1];
 
-      // feature vector will append 1 as x_0, and then take in all
-      // but the last column (which is assigned as label)
-      double[] X = new double[columns.length];
+            // special fix of label for handwritten digits data set: label "10" switched to "0"
+            if (label.equals("10")) {
+                label = "0";
+            }
 
-      X[0] = 1;
-      for (int i = 1; i < columns.length; i++) {
-        // check if feature is numeric
-        if (isNumeric(columns[i - 1])) {
-          X[i] = Double.parseDouble(columns[i - 1]);
-        } else {
-          // code to convert nominal X to numeric
+            DataPoint dataPoint = new DataPoint(label, X);
+
+            dataPoint.setTestOrTrain("held_out");
+            dataset.add(dataPoint);
         }
-      }
+        scanner.close();
 
-      label = columns[columns.length - 1];
+        return dataset;
+    }
+    ///////////////////////////////////////////////////////////////////////////////////
 
-      // add higher order X
-      ArrayList<Double> higherOrderX = new ArrayList<Double>();
+    //////////////////////////////////////////////////////////////////////////////////////////////////
+    // method that creates a list of dataPoints with higher order polynomial X upto to user defined
+    // degree
+    public static List<DataPoint> readDataSetHigherOrderFeatures(String file, int degree)
+        throws FileNotFoundException {
 
-      for (int n = 0; n <= degree; n++) {
-        for (int k = 0; k <= n; k++) {
-          double xnk = Math.pow(X[1], n - k) * Math.pow(X[2], k);
-          higherOrderX.add(xnk);
+        List<DataPoint> dataset = new ArrayList<DataPoint>();
+        Scanner scanner = new Scanner(new File(file));
+
+        String line;
+        String[] columns;
+        String label;
+
+        // all dataPoints in dataset given dummy labelAsDouble, which will be changed
+        // from with call to Logistic.train, based on target label
+        double labelAsDouble = -1.;
+
+        while (scanner.hasNextLine()) {
+            line = scanner.nextLine();
+            columns = line.split(",");
+
+            // feature vector will append 1 as x_0, and then take in all
+            // but the last column (which is assigned as label)
+            double[] X = new double[columns.length];
+
+            X[0] = 1;
+            for (int i = 1; i < columns.length; i++) {
+                // check if feature is numeric
+                if (isNumeric(columns[i - 1])) {
+                    X[i] = Double.parseDouble(columns[i - 1]);
+                } else {
+                    // code to convert nominal X to numeric
+                }
+            }
+
+            label = columns[columns.length - 1];
+
+            // add higher order X
+            ArrayList<Double> higherOrderX = new ArrayList<Double>();
+
+            for (int n = 0; n <= degree; n++) {
+                for (int k = 0; k <= n; k++) {
+                    double xnk = Math.pow(X[1], n - k) * Math.pow(X[2], k);
+                    higherOrderX.add(xnk);
+                }
+            }
+
+            // convert list to array
+            double[] allX = new double[higherOrderX.size()];
+            for (int i = 0; i < higherOrderX.size(); i++) {
+                allX[i] = higherOrderX.get(i);
+            }
+
+            DataPoint dataPoint = new DataPoint(label, allX);
+
+            dataPoint.setTestOrTrain("held_out");
+            dataset.add(dataPoint);
         }
-      }
+        scanner.close();
 
-      // convert list to array
-      double[] allX = new double[higherOrderX.size()];
-      for (int i = 0; i < higherOrderX.size(); i++) {
-        allX[i] = higherOrderX.get(i);
-      }
+        System.out.print("Each data point now has the feature vector: ");
+        for (int n = 0; n <= degree; n++) {
+            for (int k = 0; k <= n; k++) {
+                System.out.print(", x1^" + (n - k) + "*x2^" + k);
+            }
+        }
+        System.out.println();
 
-      DataPoint dataPoint = new DataPoint(label, allX);
-
-      dataPoint.setTestOrTrain("held_out");
-      dataset.add(dataPoint);
+        return dataset;
     }
-    scanner.close();
+    ///////////////////////////////////////////////////////////////////////////////////
 
-    System.out.print("Each data point now has the feature vector: ");
-    for (int n = 0; n <= degree; n++) {
-      for (int k = 0; k <= n; k++) {
-        System.out.print(", x1^" + (n - k) + "*x2^" + k);
-      }
+    ///////////////////////////////////////////////////////////////////////////////////
+    // check is data entry is nominal or numeric
+    public static boolean isNumeric(String str) {
+        return str.matches("-?\\d+(\\.\\d+)?"); // match a number with optional '-' and decimal.
     }
-    System.out.println();
+    ///////////////////////////////////////////////////////////////////////////////////
 
-    return dataset;
-  }
-  ///////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////
+    // "split off" testSet by setting testOrTrain variable for each dataPoint based on fraction input
+    // by user
+    public static List<DataPoint> getTestSet(List<DataPoint> fullDataSet, double fractionTestSet) {
 
-  ///////////////////////////////////////////////////////////////////////////////////
-  // check is data entry is nominal or numeric
-  public static boolean isNumeric(String str) {
-    return str.matches("-?\\d+(\\.\\d+)?"); // match a number with optional '-' and decimal.
-  }
-  ///////////////////////////////////////////////////////////////////////////////////
+        // Random rnd = new Random(123);
+        // Collections.shuffle(fullDataSet, rnd);
+        Collections.shuffle(fullDataSet);
 
-  ///////////////////////////////////////////////////////////////////////////////////
-  // "split off" testSet by setting testOrTrain variable for each dataPoint based on fraction input
-  // by user
-  public static List<DataPoint> getTestSet(List<DataPoint> fullDataSet, double fractionTestSet) {
+        List<DataPoint> testSet = new ArrayList<DataPoint>();
 
-    // Random rnd = new Random(123);
-    // Collections.shuffle(fullDataSet, rnd);
-    Collections.shuffle(fullDataSet);
+        // shuffle dataSet and split into test and training sets by setting
+        // testOrTrain variable for each dataPoint
+        for (int i = 0; i < fractionTestSet * fullDataSet.size(); i++) {
+            fullDataSet.get(i).setTestOrTrain("test_set");
+            testSet.add(fullDataSet.get(i));
+        }
 
-    List<DataPoint> testSet = new ArrayList<DataPoint>();
-
-    // shuffle dataSet and split into test and training sets by setting
-    // testOrTrain variable for each dataPoint
-    for (int i = 0; i < fractionTestSet * fullDataSet.size(); i++) {
-      fullDataSet.get(i).setTestOrTrain("test_set");
-      testSet.add(fullDataSet.get(i));
+        return testSet;
     }
+    //////////////////////////////////////////////////////////////////////////////////////
 
-    return testSet;
-  }
-  //////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////
+    // "split off" trainingSet by setting testOrTrain variable for each dataPoint based on fraction
+    // input by user
+    public static List<DataPoint> getTrainingSet(
+                                                 List<DataPoint> fullDataSet, double fractionTrainingSet) {
 
-  ///////////////////////////////////////////////////////////////////////////////////
-  // "split off" trainingSet by setting testOrTrain variable for each dataPoint based on fraction
-  // input by user
-  public static List<DataPoint> getTrainingSet(
-      List<DataPoint> fullDataSet, double fractionTrainingSet) {
+        // Random rnd = new Random(123);
+        // Collections.shuffle(fullDataSet);
+        Collections.shuffle(fullDataSet);
 
-    // Random rnd = new Random(123);
-    // Collections.shuffle(fullDataSet);
-    Collections.shuffle(fullDataSet);
+        List<DataPoint> trainingSet = new ArrayList<DataPoint>();
 
-    List<DataPoint> trainingSet = new ArrayList<DataPoint>();
+        int count = 0;
+        int i = 0;
+        while (count < fractionTrainingSet * fullDataSet.size() && i < fullDataSet.size()) {
+            String currentSetting = fullDataSet.get(i).getTestOrTrain();
 
-    int count = 0;
-    int i = 0;
-    while (count < fractionTrainingSet * fullDataSet.size() && i < fullDataSet.size()) {
-      String currentSetting = fullDataSet.get(i).getTestOrTrain();
+            if (currentSetting.equals("training_set")) {
+                trainingSet.add(fullDataSet.get(i));
+                count++;
+            } else if (!currentSetting.equals("test_set")) {
+                fullDataSet.get(i).setTestOrTrain("training_set");
+                trainingSet.add(fullDataSet.get(i));
+                count++;
+            }
 
-      if (currentSetting.equals("training_set")) {
-        trainingSet.add(fullDataSet.get(i));
-        count++;
-      } else if (!currentSetting.equals("test_set")) {
-        fullDataSet.get(i).setTestOrTrain("training_set");
-        trainingSet.add(fullDataSet.get(i));
-        count++;
-      }
+            i++;
+        }
 
-      i++;
+        return trainingSet;
     }
+    ///////////////////////////////////////////////////////////////////////////////////
 
-    return trainingSet;
-  }
-  ///////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////
+    // count & print frequencies of different labels
+    public static void printLabelFrequencies(List<DataPoint> fullDataSet) {
 
-  /////////////////////////////////////////////////////////////////////////////////////
-  // count & print frequencies of different labels
-  public static void printLabelFrequencies(List<DataPoint> fullDataSet) {
+        HashMap<String, Integer> labelFrequencies = new HashMap<String, Integer>();
 
-    HashMap<String, Integer> labelFrequencies = new HashMap<String, Integer>();
+        List<String> labels = new ArrayList<String>();
 
-    List<String> labels = new ArrayList<String>();
+        for (DataPoint i : fullDataSet) {
+            labels.add(i.getLabel());
+        }
 
-    for (DataPoint i : fullDataSet) {
-      labels.add(i.getLabel());
+        Set<String> uniqueSet = new HashSet<String>(labels);
+
+        for (String temp : uniqueSet) {
+            labelFrequencies.put(temp, Collections.frequency(labels, temp));
+            System.out.println(temp + " " + Collections.frequency(labels, temp) + " dataPoints");
+        }
     }
+    ///////////////////////////////////////////////////////////////////////////////////////
 
-    Set<String> uniqueSet = new HashSet<String>(labels);
+    ////////////////////////////////////////////////////////////////////////////
+    // get list (set) of unique labels
+    public static Set<String> getLabels(List<DataPoint> fullDataSet) {
 
-    for (String temp : uniqueSet) {
-      labelFrequencies.put(temp, Collections.frequency(labels, temp));
-      System.out.println(temp + " " + Collections.frequency(labels, temp) + " dataPoints");
+        List<String> labels = new ArrayList<String>();
+
+        for (DataPoint i : fullDataSet) {
+            labels.add(i.getLabel());
+        }
+
+        Set<String> uniqueSet = new HashSet<String>(labels);
+
+        return uniqueSet;
     }
-  }
-  ///////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
 
-  ////////////////////////////////////////////////////////////////////////////
-  // get list (set) of unique labels
-  public static Set<String> getLabels(List<DataPoint> fullDataSet) {
-
-    List<String> labels = new ArrayList<String>();
-
-    for (DataPoint i : fullDataSet) {
-      labels.add(i.getLabel());
+    ////////////////////////////////////////////////////////////////////////////
+    //
+    public static void printDataSet(List<DataPoint> fullDataSet) {
+        for (DataPoint i : fullDataSet) {
+            System.out.println(
+                               "X = "
+                               + Arrays.toString(i.getX())
+                               + ", label = "
+                               + i.getLabel()
+                               + ", label as vector: "
+                               + Arrays.toString(i.getX()));
+        }
     }
+    ////////////////////////////////////////////////////////////////////////////
 
-    Set<String> uniqueSet = new HashSet<String>(labels);
+    ////////////////////////////////////////////////////////////////////////////
+    // TASK 4: make a method here called distanceEuclid 
 
-    return uniqueSet;
-  }
-  ////////////////////////////////////////////////////////////////////////////
-
-  ////////////////////////////////////////////////////////////////////////////
-  //
-  public static void printDataSet(List<DataPoint> fullDataSet) {
-    for (DataPoint i : fullDataSet) {
-      System.out.println(
-          "X = "
-              + Arrays.toString(i.getX())
-              + ", label = "
-              + i.getLabel()
-              + ", label as vector: "
-              + Arrays.toString(i.getX()));
-    }
-  }
-  ////////////////////////////////////////////////////////////////////////////
-
-  ////////////////////////////////////////////////////////////////////////////
-  // TASK 4: make a method here called distanceEuclid 
-
-  ////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
 
 
 }
