@@ -14,32 +14,6 @@ import javax.swing.*;
 */
 public class DataSet {
 
-    public static void main(String[] args) {
-        if (args.length < 1) {
-            System.out.println("Enter a filename for a dataset");
-            System.exit(1);
-        }
-	
-	try {
-	    List<DataPoint> dataset = readDataSet(args[0]);
-	    DataPoint myPoint = dataset.get(0);
-	    double[] features = myPoint.getX();
-	    String label = myPoint.getLabel();
-	    System.out.print("Features: ");
-	    for(int i = 0; i < features.length; i++) {
-		System.out.print(features[i]);
-		System.out.print(' ');
-	    }
-	    System.out.println();
-	    System.out.println("Label: " + label);
-
-	    List<DataPoint> testSet = getTestSet(dataset, 0.5);
-	    List<DataPoint> trainingSet = getTrainingSet(dataset, 0.5);
-	} catch (FileNotFoundException error) {
-	    System.out.println("File not found");
-	    System.exit(1);
-	}
-    }
     //////////////////////////////////////////////////////////////////////////////////////////////////
     // method that creates a list of dataPoints
     public static List<DataPoint> readDataSet(String file) throws FileNotFoundException {
@@ -272,10 +246,17 @@ public class DataSet {
         }
     }
     ////////////////////////////////////////////////////////////////////////////
-
     ////////////////////////////////////////////////////////////////////////////
-    // TASK 4: make a method here called distanceEuclid 
 
+    // TASK 4: make a method here called distanceEuclid 
+	public static double distanceEuclid(DataPoint x, DataPoint y) {
+		double squaredDistance = 0;
+		for(int i = 0; i < x.getX().length; i++) {
+			double d = Math.abs(x.getX()[i] - y.getX()[i]);
+			squaredDistance += d * d;
+		}
+		return Math.sqrt(squaredDistance);
+	}
     ////////////////////////////////////////////////////////////////////////////
 
 
