@@ -40,9 +40,10 @@ the right answer because it has more information to compare itself to, meaning t
 the correct answer (malignant vs. benign) will be chosen. On the other hand, if *k* is small,
 it is likely that the result of the algorithm will be correct. It will be basing its decision off of fewer 
 points around it, therefore likely going toward the correct conclusion or result. 
+
 For example, if *k* is small and there is only one or two points surrounding it, both being benign, the result is likely
 to be benign as well and therefore choose the correct result. However, if *k* is large, it is likely that there will be 
 several malignants and several benigns surrounding it, meaning that it won't know which is correct/which to choose. 
-This can be shown by running the *k*-Nearest Neighbout algorithm with both large and small values of *k*,
+This can be shown by running the *k*-Nearest Neighbour algorithm with both large and small values of *k*,
 and printing the result of each 1000 run, showing the precision and recall as *k* increases. 
 It appears that both precision and recall decrease as values of *k* increase.  
