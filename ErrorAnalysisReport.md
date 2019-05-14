@@ -4,7 +4,7 @@
 ### Soirlita Lam
 
 ### Confidence in the model
-Although the accuracy doesn't varry by more than 2-3%, there is a difference in
+Although the accuracy doesn't vary by more than 2-3%, there is a difference in
 accuracy because of the lines 140-150 in `DataSet.java`. Here, there is 
 a shuffling that occurs between all the values in the test set with each run.
 Therefore, depending on which data has been shuffled into the test set, the
